@@ -9,9 +9,11 @@ import UIKit
 
 class MyTableViewController: UITableViewController {
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+    
 
         
     }
@@ -54,7 +56,11 @@ class MyTableViewController: UITableViewController {
         
     
     // MARK: - Navigation
-
+    struct AudioConstants{
+        static let AUDIO_BUFFER_SIZE = 1024*4
+    }
+    
+    let audio = AudioModel(buffer_size: AudioConstants.AUDIO_BUFFER_SIZE)
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         // Get the new view controller using segue.destination.
@@ -62,7 +68,11 @@ class MyTableViewController: UITableViewController {
         if let vc = segue.destination as? ViewController,
            let cell = sender as? UITableViewCell,
            let name = cell.textLabel?.text {
-            vc.displayImageName = name
+            vc.displaySongName = name
+            audio.togglePlaying()
+            vc.viewDidDisappear(true)
+            audio.pause()
+            
         }
     }
     

@@ -50,13 +50,18 @@ class ViewController: UIViewController {
             graph.makeGrids() // add grids to graph
         }
         
-        
-        
-        // start up the audio model here, querying microphone
-        //audio.startMicrophoneProcessing(withFps: 20) // preferred number of FFT calculations per second
-        
-
-        //audio.play()
+      
+    }
+    
+    
+    @IBAction func play(_ sender: UIButton) {
+        audio.startProcesingAudioFileForPlayback(withFps: 20)
+        audio.togglePlaying()
+        audio.playing = true
+        Timer.scheduledTimer(timeInterval: 0.05, target: self,
+                             selector: #selector(self.updateGraph),
+                             userInfo: nil,
+                             repeats: true)
         /*
         run the loop for updating the graph peridocially
         Timer.scheduledTimer(timeInterval: 0.05, target: self,
@@ -65,16 +70,7 @@ class ViewController: UIViewController {
                              repeats: true)
        */
     }
-    
-    
-    @IBAction func play(_ sender: UIButton) {
-        audio.startProcesingAudioFileForPlayback(withFps: 20)
-        audio.togglePlaying()
-        Timer.scheduledTimer(timeInterval: 0.05, target: self,
-                             selector: #selector(self.updateGraph),
-                             userInfo: nil,
-                             repeats: true)
-    }
+
     @IBAction func volumeChanged(_ sender: UISlider) {
         // set the volumen using the audio model, this controls the output block
         audio.setVolume(val: sender.value)
@@ -83,16 +79,60 @@ class ViewController: UIViewController {
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        [super.viewWillDisappear(animated)];
-        [audio.pause];
+        super.viewWillDisappear(animated);
+        if(audio.playing==true){
+            audio.pause();
+            
+        }
+        //audio.pause();
+        
+    }
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated);
+        
+        if(audio.playing==true){
+            audio.pause();
+            
+        }
+       
+        
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated);
+        audio.playing = true
+        if(audio.playing==true)
+        {
+            audio.play()
+            Timer.scheduledTimer(timeInterval: 0.05, target: self,
+                                 selector: #selector(self.updateGraph),
+                                 userInfo: nil,
+                                 repeats: true)
+            
+        }
+        
+        
+        //audio.play();
+        
     }
     
     @IBOutlet weak var volumeLabel: UILabel!
-    override func viewWillAppear(_ animated: Bool) {
-        [super.viewWillAppear(animated)];
-        [audio.play];
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated);
+        if(audio.playing==true)
+        {
+            audio.play()
+            Timer.scheduledTimer(timeInterval: 0.05, target: self,
+                                 selector: #selector(self.updateGraph),
+                                 userInfo: nil,
+                                 repeats: true)
+            
+        }
+        
     }
-    var displayImageName = "psuedo"
+    
+    
+    var displaySongName = "Satisfaction"
     // periodically, update the graph with refreshed FFT Data
     @objc func updateGraph(){
         

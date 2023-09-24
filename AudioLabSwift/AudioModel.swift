@@ -18,6 +18,7 @@ class AudioModel {
     var timeData:[Float]
     var fftData:[Float]
     var fftData2:[Float]
+    var playing:Bool
     //var max:[Float]
     
     // MARK: Public Methods
@@ -27,6 +28,7 @@ class AudioModel {
         timeData = Array.init(repeating: 0.0, count: BUFFER_SIZE)
         fftData = Array.init(repeating: 0.0, count: BUFFER_SIZE/2)
         fftData2 = Array.init(repeating: 0.0, count: BUFFER_SIZE/2)
+        playing = false
         //max = Array.init(repeating: 0.0, count: 20)
     }
     // public function for starting processing of microphone data
@@ -74,17 +76,22 @@ class AudioModel {
         //printMax(data: Optional<UnsafeMutablePointer<Float>>, numFrames: UInt32, numChannel
         
     }
+    //var playing = false
     
     // You must call this when you want the audio to start being handled by our model
     func play(){
         if let manager = self.audioManager{
+            playing = true
             manager.play()
+            
+            
         }
     }
     
     func pause(){
         if let manager = self.audioManager{
             manager.pause()
+            
         }
     }
     

@@ -29,27 +29,10 @@ class AudioModel {
         fftData = Array.init(repeating: 0.0, count: BUFFER_SIZE/2)
         fftData2 = Array.init(repeating: 0.0, count: BUFFER_SIZE/2)
         playing = false
-        //max = Array.init(repeating: 0.0, count: 20)
+        
     }
-    // public function for starting processing of microphone data
-    /*
-    func startMicrophoneProcessing(withFps:Double){
-        // setup the microphone to copy to circualr buffer
-        if let manager = self.audioManager{
-            manager.inputBlock = self.handleMicrophone
-            //manager.outputBlock = self.printMax
-            
-            
-            // repeat this fps times per second using the timer class
-            //   every time this is called, we update the arrays "timeData" and "fftData"
-            Timer.scheduledTimer(withTimeInterval: 1.0/withFps, repeats: true) { _ in
-                self.runEveryInterval()
-            }
-            
-        }
-    }
-    */
     
+    // public function for starting processing of audio file data
     func startProcesingAudioFileForPlayback(withFps:Double){
         // set the output block to read from and play the audio file
         if let manager = self.audioManager,
@@ -70,24 +53,23 @@ class AudioModel {
         }
         
     }
-    private func handleMicrophone (data:Optional<UnsafeMutablePointer<Float>>, numFrames:UInt32, numChannels: UInt32) {
-        // copy samples from the microphone into circular buffer
-        self.inputBuffer?.addNewFloatData(data, withNumSamples: Int64(numFrames))
-        //printMax(data: Optional<UnsafeMutablePointer<Float>>, numFrames: UInt32, numChannel
-        
-    }
-    //var playing = false
     
+
     // You must call this when you want the audio to start being handled by our model
-    func play(){
+    func play(withFps:Double){
         if let manager = self.audioManager{
             playing = true
             manager.play()
+            manager.inputBlock = self.handleMicrophone
             
-            
+            Timer.scheduledTimer(withTimeInterval: 1.0/withFps, repeats: true) { _ in
+                self.runEveryInterval()
+                
+            }
         }
     }
     
+    //We need a pause function to stop audio when leaving view
     func pause(){
         if let manager = self.audioManager{
             manager.pause()
@@ -95,6 +77,7 @@ class AudioModel {
         }
     }
     
+    //For the button to start playing and reset
     func togglePlaying(){
         if let manager = self.audioManager, let reader=self.fileReader{
             if manager.playing{
@@ -107,17 +90,10 @@ class AudioModel {
         }
     }
     
+    //For the volume slider
     func setVolume(val:Float){
         self.volume = val
     }
-    
-   
-
-    
-    //MARK: File Reader object has three functions that we will use:
-    //      init(), find the audio file and make sure we can see it
-    //      play(), go to the file and start decoding samples
-    //      retrieveFreshAudio(...), load new samples buffer by buffer into an array
 
     
     //==========================================
@@ -125,9 +101,6 @@ class AudioModel {
     
     private var volume:Float = 1.0 // internal storage for volume
     
-    
-    //==========================================
-    // MARK: Private Properties
     private lazy var audioManager:Novocaine? = {
         return Novocaine.audioManager()
     }()
@@ -147,11 +120,9 @@ class AudioModel {
                                    andBufferSize: Int64(BUFFER_SIZE))
     }()
     
-    
+
     //==========================================
     // MARK: Private Methods
-    // NONE for this model
-    
     //==========================================
     // MARK: Model Callback Methods
     private func runEveryInterval(){
@@ -176,12 +147,13 @@ class AudioModel {
     }
     
     
-    //==========================================
-    // MARK: Audiocard Callbacks
-    // in obj-C it was (^InputBlock)(float *data, UInt32 numFrames, UInt32 numChannels)
-    // and in swift this translates to:
+   
     
-
+    //MARK: File Reader object has three functions that we will use:
+    //      init(), find the audio file and make sure we can see it
+    //      play(), go to the file and start decoding samples
+    //      retrieveFreshAudio(...), load new samples buffer by buffer into an array
+    
     private lazy var fileReader:AudioFileReader? = {
         // find song in the main Bundle
         if let url = Bundle.main.url(forResource: "satisfaction", withExtension: "mp3"){
@@ -234,6 +206,18 @@ class AudioModel {
             
             
         }
+    }
+    
+    //==========================================
+        // MARK: Audiocard Callbacks
+        // in obj-C it was (^InputBlock)(float *data, UInt32 numFrames, UInt32 numChannels)
+        // and in swift this translates to:
+        // public function for starting processing of microphone data
+    private func handleMicrophone (data:Optional<UnsafeMutablePointer<Float>>, numFrames:UInt32, numChannels: UInt32) {
+        // copy samples from the microphone into circular buffer
+        self.inputBuffer?.addNewFloatData(data, withNumSamples: Int64(numFrames))
+        //printMax(data: Optional<UnsafeMutablePointer<Float>>, numFrames: UInt32, numChannel
+        
     }
 }
 

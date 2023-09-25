@@ -30,6 +30,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        //Build the graph
         if let graph = self.graph{
             graph.setBackgroundColor(r: 0, g: 0, b: 0, a: 1)
             
@@ -49,26 +50,22 @@ class ViewController: UIViewController {
             
             graph.makeGrids() // add grids to graph
         }
+
         
       
     }
-    
-    
+    // just start up the audio model here
+    //Play Button
     @IBAction func play(_ sender: UIButton) {
         audio.startProcesingAudioFileForPlayback(withFps: 20)
         audio.togglePlaying()
-        audio.playing = true
+        audio.playing = true //Set boolean to know when to pause
+        //Schedule timer to update graph
         Timer.scheduledTimer(timeInterval: 0.05, target: self,
                              selector: #selector(self.updateGraph),
                              userInfo: nil,
                              repeats: true)
-        /*
-        run the loop for updating the graph peridocially
-        Timer.scheduledTimer(timeInterval: 0.05, target: self,
-                             selector: #selector(self.updateGraph),
-                             userInfo: nil,
-                             repeats: true)
-       */
+    
     }
 
     @IBAction func volumeChanged(_ sender: UISlider) {
@@ -78,6 +75,7 @@ class ViewController: UIViewController {
         volumeLabel.text = String(format: "Volume: %.1f", sender.value )
     }
     
+    //To pause when leaving screen
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated);
         if(audio.playing==true){
@@ -87,6 +85,7 @@ class ViewController: UIViewController {
         //audio.pause();
         
     }
+    //To pause when leaving screen
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated);
         
@@ -97,39 +96,24 @@ class ViewController: UIViewController {
        
         
     }
+    
+    //Setup to start place when audio.playing = true
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated);
-        audio.playing = true
-        if(audio.playing==true)
-        {
-            audio.play()
+        
+    
+            audio.play(withFps: 20)
+            audio.playing = true
+        // run the loop for updating the graph peridocially
             Timer.scheduledTimer(timeInterval: 0.05, target: self,
                                  selector: #selector(self.updateGraph),
                                  userInfo: nil,
                                  repeats: true)
-            
-        }
-        
-        
-        //audio.play();
-        
+
     }
     
     @IBOutlet weak var volumeLabel: UILabel!
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated);
-        if(audio.playing==true)
-        {
-            audio.play()
-            Timer.scheduledTimer(timeInterval: 0.05, target: self,
-                                 selector: #selector(self.updateGraph),
-                                 userInfo: nil,
-                                 repeats: true)
-            
-        }
-        
-    }
     
     
     var displaySongName = "Satisfaction"
@@ -149,10 +133,12 @@ class ViewController: UIViewController {
                 
             )
               
-           
+           //Use accelerate to get the max from the fftData2 that is of size buffersize/2, and broken down into 20 windows,
+            //where each window is a fifth of the halfed buffersize. We do not need the second part of the fft as it is
+            //only a mirror of the first half
             vDSP_vswmax(self.audio.fftData2, 1, &audio.fftData2, 1, vDSP_Length(AudioConstants.AUDIO_BUFFER_SIZE/20), vDSP_Length(AudioConstants.AUDIO_BUFFER_SIZE/100))
                 
-            
+            //Setup fft2 graph 
             graph.updateGraph(
                 data: self.audio.fftData2,
                 forKey: "fft2"
